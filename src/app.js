@@ -12,26 +12,6 @@ app.set('view engine', 'hbs');
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: false }));
 
-const test = new Review ({
-	courseNumber: "CSCI-UA.2020",
-  courseName: "Intro To Devin",
-  semester: "Spring",
-  year: 2020,
-  professor: "Ms. Lewtan",
-	review: "the big quar, huh",
-});
-
-// app.get('/', (req, res) => {
-//   res.send(test.courseName)
-// });
-// let newReviews = [];
-//
-// Review.find({}, (err, reviews) => {
-//   newReviews = reviews;
-//   //res.render('all', {reviews: newReviews});
-// });
-
-
 app.get('/', (req, res) => {
   // shows form
   const { semester, year, professor } = req.query;
@@ -46,28 +26,33 @@ app.get('/', (req, res) => {
 	if (professor !== undefined && professor !== "") {
 		query.professor = professor
 	}
-	console.log(query)
   Review.find(query, (err, reviews) =>
     res.render('all', {reviews: reviews})
   )
   });
 
+app.get('/reviews/add', (req, res) => {
+  // shows form
+    res.render('review');
+});
 
-// app.get('/add', (req, res) => {
-//   // shows form
-//     res.render('review');
-// });
-//
-// app.post('/add', (req, res) => {
-//   Review.find({}, (err, reviews) => {
-//     const { courseNumber, courseName, semester, year, professor, review } = req.body
-//     newReviews = [new Review({ courseNumber, courseName, semester, year, professor, review }), reviews]
-//     res.render('all', {reviews: newReviews});
-//   });
-// });
+app.post('/reviews/add', (req, res) => {
+  Review.find({}, (err, reviews) => {
+		const newReview = new Review(req.body)
+		newReview.save((err, savedReview) => {
+			if(err) {
+	      Review.find({}, (err, reviews) => {
+	        res.render('review', {reviews: reviews, error: 'there was an error in your submission'});
+	      });
+	    } else {
+				console.log(savedReview.courseName, 'has been added to the reviews collection')
+	      res.redirect('../');
+	    }
+		})
+  });
+});
 
 
-//const dataPath = path.join(__dirname, 'data.json');
   const port = 3000;
   app.listen(port);
   console.log(`server started on port ${port}`);
