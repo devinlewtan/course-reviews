@@ -32,9 +32,23 @@ app.use(function (req, res, next) {
   next()
 })
 
+//my sessions middleware
+app.use(function(req, res, next) {
+  const review = req.body
+  if (req.session.Reviews === undefined) {
+    req.session.Reviews = []
+  }
+	if (Object.keys(review).length !== 0) {
+		req.session.Reviews.push(review)
+		}
+		res.locals.myReviews = req.session.Reviews;
+  next();
+})
+
 //cooookies middleware
 app.use((req, res, next) => {
   console.log(req.headers.cookie)
+	next()
 })
 
 app.get('/', (req, res) => {
@@ -75,6 +89,10 @@ app.post('/reviews/add', (req, res) => {
   });
 });
 
+app.get('/reviews/mine', (req, res) => {
+  // shows form
+    res.render('mine');
+});
 
   const port = 3000;
   app.listen(port);
