@@ -12,10 +12,33 @@ app.set('view engine', 'hbs');
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: false }));
 
+//sesions
+const session = require('express-session');
+const sessionOptions = {
+	secret: 'secret for signing session id',
+	saveUninitialized: false,
+	resave: false
+};
+app.use(session(sessionOptions));
+
+//session visits middleware
+app.use(function (req, res, next) {
+  if (!req.session.views) {
+    req.session.views = 0
+  }
+	res.locals.visits = req.session.views
+  // count the views
+  req.session.views++
+  next()
+})
+
+//cooookies middleware
+app.use((req, res, next) => {
+  console.log(req.headers.cookie)
+})
+
 app.get('/', (req, res) => {
-  // shows form
   const { semester, year, professor } = req.query;
-  // show reviews too
 	let query = {}
 	if (semester !== undefined && semester !== "" && semester !== "All") {
 		query.semester = semester
